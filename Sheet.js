@@ -1,8 +1,7 @@
 /**
- * Acceso a la hoja y duplicados.
- * Google/Bing: guid/link; además mismo título + misma fuente (p. ej. 1h vs 24h en distintos RSS).
- * Otros feeds: también por título solo (comportamiento previo).
- * Mismo título en otro medio (source distinta) no se considera duplicado.
+ * Acceso a la hoja y control de duplicados — Noticias de Parabuses.
+ * 7 columnas: Title | Description | Link | PubDate | Source | guid | Sentimiento
+ * Dedupe: guid/link + título+fuente (feeds 1h vs 24h del mismo medio).
  */
 
 function titleSourceDedupKey(title, source) {
@@ -36,12 +35,12 @@ function getExistingIds(sheet) {
   var TITLE_COL = 0, LINK_COL = 2, SOURCE_COL = 4, GUID_COL = 5;
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
-    var guid = (row[GUID_COL] || '').toString().trim();
-    var link = (row[LINK_COL] || '').toString().trim();
-    var title = (row[TITLE_COL] || '').toString().trim();
+    var guid   = (row[GUID_COL]   || '').toString().trim();
+    var link   = (row[LINK_COL]   || '').toString().trim();
+    var title  = (row[TITLE_COL]  || '').toString().trim();
     var source = (row[SOURCE_COL] || '').toString().trim();
-    if (guid) existingGuids[guid] = true;
-    if (link) existingLinks[link] = true;
+    if (guid)  existingGuids[guid]   = true;
+    if (link)  existingLinks[link]   = true;
     if (title) existingTitles[title] = true;
     var tsKey = titleSourceDedupKey(title, source);
     if (tsKey) existingTitleSource[tsKey] = true;
@@ -50,8 +49,8 @@ function getExistingIds(sheet) {
 }
 
 function isDuplicate(item, existing) {
-  var guid = (item.guid || '').toString().trim();
-  var link = (item.link || '').toString().trim();
+  var guid  = (item.guid  || '').toString().trim();
+  var link  = (item.link  || '').toString().trim();
   var title = (item.title || '').toString().trim();
 
   if (existing.guids[guid]) return true;
@@ -72,8 +71,6 @@ function appendNote(sheet, note) {
     note.pubDate,
     note.source,
     note.guid,
-    note.relevante || '',
-    note.relevanciaMotivo || '',
     note.sentimiento || ''
   ]);
 }

@@ -1,5 +1,5 @@
 /**
- * Sentimiento hacia Atlas FC vía OpenAI.
+ * Sentimiento hacia Parabuses vía OpenAI.
  * Devuelve "Nota Positiva 🟢" | "Nota Negativa 🔴" | "Nota Neutral ⚪"
  */
 
@@ -19,7 +19,7 @@ function getSentimientoTexto(title, description) {
       },
       {
         role: 'user',
-        content: 'Clasifica el sentimiento de esta noticia hacia el club Atlas FC de Guadalajara (fútbol mexicano, Los Zorros). Responde solo: Positiva, Negativa o Neutral.\n\n' + text
+        content: 'Clasifica el sentimiento de esta noticia hacia Parabuses. Responde solo: Positiva, Negativa o Neutral.\n\n' + text
       }
     ],
     max_tokens: 10,

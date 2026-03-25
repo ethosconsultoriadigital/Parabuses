@@ -1,5 +1,7 @@
 /**
- * Obtiene y parsea feeds RSS. Devuelve array de { title, description, link, pubDate, source, guid, isGoogleNews }.
+ * Obtiene y parsea feeds RSS — Noticias de Parabuses.
+ * Sin filtros de contenido: se pasan TODOS los ítems del feed.
+ * Devuelve array de { title, description, link, pubDate, source, guid, isGoogleNews }.
  */
 
 function fetchFeed(url) {
@@ -69,13 +71,13 @@ function formatPubDateForSheet(pubDateStr) {
 
 function parseRssItem(itemEl) {
   try {
-    var title = getTagText(itemEl, 'title');
-    var link = getTagText(itemEl, 'link');
-    var desc = stripHtml(getTagText(itemEl, 'description'));
+    var title   = getTagText(itemEl, 'title');
+    var link    = getTagText(itemEl, 'link');
+    var desc    = stripHtml(getTagText(itemEl, 'description'));
     var pubDate = getTagText(itemEl, 'pubDate');
-    var guid = getTagText(itemEl, 'guid');
+    var guid    = getTagText(itemEl, 'guid');
     var sourceEl = itemEl.getChild('source');
-    var source = sourceEl ? (sourceEl.getAttribute('url') ? sourceEl.getText() : sourceEl.getText()) : '';
+    var source = sourceEl ? sourceEl.getText() : '';
 
     if (!source && sourceEl) source = sourceEl.getText();
     if (!source) {
@@ -84,21 +86,18 @@ function parseRssItem(itemEl) {
         var nm = kids[si].getName();
         if (nm && /source/i.test(nm)) {
           var st = kids[si].getText();
-          if (st) {
-            source = st.trim();
-            break;
-          }
+          if (st) { source = st.trim(); break; }
         }
       }
     }
 
     return {
-      title: title || '',
-      description: desc || '',
-      link: link || '',
-      pubDate: pubDate || '',
-      source: source || '',
-      guid: guid || link || '',
+      title:       title || '',
+      description: desc  || '',
+      link:        link  || '',
+      pubDate:     pubDate || '',
+      source:      source || '',
+      guid:        guid || link || '',
       isGoogleNews: link.indexOf('news.google.com') !== -1
     };
   } catch (e) {
@@ -115,41 +114,6 @@ function getTagText(parent, tagName) {
   } catch (e) {
     return '';
   }
-}
-
-/** Feeds no agregadores: título+descripción deben coincidir con KEYWORDS. */
-function matchesFeedKeywords(item) {
-  var text = (item.title + ' ' + item.description).toLowerCase();
-  return CONFIG.KEYWORDS.some(function(k) {
-    return text.indexOf(k.toLowerCase()) !== -1;
-  });
-}
-
-/**
- * Notas de cobertura de partido / vivo / previa (refuerzo además de Awario).
- */
-function isMatchReportNoise(item) {
-  var cfg = CONFIG.MATCH_REPORT_FILTER;
-  if (!cfg || !cfg.ENABLED) return false;
-  var text = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
-  var phrases = cfg.PHRASES || [];
-  for (var i = 0; i < phrases.length; i++) {
-    var p = (phrases[i] || '').toString().toLowerCase();
-    if (p && text.indexOf(p) !== -1) return true;
-  }
-  return false;
-}
-
-function isLowValueNoise(item) {
-  var cfg = CONFIG.LOW_VALUE_FILTER;
-  if (!cfg || !cfg.ENABLED) return false;
-  var text = ((item.title || '') + ' ' + (item.description || '')).toLowerCase();
-  var phrases = cfg.PHRASES || [];
-  for (var j = 0; j < phrases.length; j++) {
-    var q = (phrases[j] || '').toString().toLowerCase();
-    if (q && text.indexOf(q) !== -1) return true;
-  }
-  return false;
 }
 
 function isWithinLast24Hours(pubDateStr, acceptMissing) {
@@ -169,17 +133,13 @@ function isWithinLast24Hours(pubDateStr, acceptMissing) {
 function getAllFeedEntries() {
   var entries = [];
   (CONFIG.GOOGLE_NEWS_FEEDS || []).forEach(function(u) {
-    entries.push({ url: u, skipKeyword: true, isGoogleNews: true });
+    entries.push({ url: u, isGoogleNews: true });
   });
   (CONFIG.BING_NEWS_FEEDS || []).forEach(function(u) {
-    entries.push({ url: u, skipKeyword: true, isGoogleNews: true });
+    entries.push({ url: u, isGoogleNews: true });
   });
   (CONFIG.OTHER_FEEDS || []).forEach(function(f) {
-    entries.push({
-      url: f.url,
-      skipKeyword: f.isGoogle === true,
-      isGoogleNews: f.isGoogle === true
-    });
+    entries.push({ url: f.url, isGoogleNews: f.isGoogle === true });
   });
   return entries;
 }
@@ -193,11 +153,8 @@ function getAllCandidates() {
     var items = fetchFeed(entry.url);
     items.forEach(function(item) {
       item.isGoogleNews = entry.isGoogleNews === true;
-      var dateOk = isWithinLast24Hours(item.pubDate, entry.skipKeyword === true);
-      var contentOk = entry.skipKeyword === true ? true : matchesFeedKeywords(item);
-      if (!dateOk || !contentOk) return;
-      if (isMatchReportNoise(item)) return;
-      if (isLowValueNoise(item)) return;
+      /* Solo filtra por antigüedad (24 h); sin filtros de contenido. */
+      if (!isWithinLast24Hours(item.pubDate, true)) return;
       if (seenGuid[item.guid]) return;
       seenGuid[item.guid] = true;
       var formatted = formatPubDateForSheet(item.pubDate);
@@ -211,10 +168,7 @@ function getAllCandidates() {
     var acceptAw = awCfg.ACCEPT_MISSING_DATE !== false;
     fetchAwarioMentionItems().forEach(function(item) {
       item.isGoogleNews = true;
-      var dateOkAw = isWithinLast24Hours(item.pubDate, acceptAw);
-      if (!dateOkAw) return;
-      if (isMatchReportNoise(item)) return;
-      if (isLowValueNoise(item)) return;
+      if (!isWithinLast24Hours(item.pubDate, acceptAw)) return;
       if (seenGuid[item.guid]) return;
       seenGuid[item.guid] = true;
       var formattedAw = formatPubDateForSheet(item.pubDate);

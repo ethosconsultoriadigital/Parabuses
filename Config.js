@@ -1,111 +1,29 @@
 /**
- * Configuración — Atlas FC (club de fútbol, Guadalajara).
- * Google News + Bing RSS + otros feeds + Awario (opcional).
- * Dedupe: guid/link + título+fuente (igual que IMU/MOTA).
+ * Configuración — Noticias de Parabuses.
+ * Google News RSS (24h y 1h) con término exacto "Parabuses" + Awario.
+ * Sin filtros de contenido: se captura TODO el feed tal cual.
  */
 
 var CONFIG = {
-  SPREADSHEET_ID: '',
+  SPREADSHEET_ID: '1-T1feAyrL2MXdpcoTDScgv8OM6-AaxEtVHyHORz5GeA',
   SHEET_NAME: 'Hoja 1',
 
   GOOGLE_NEWS_FEEDS: [
-    'https://news.google.com/rss/search?q=club%20atlas%20fc%20when%3A1d&hl=es-419&gl=MX&ceid=MX%3Aes-419',
-    'https://news.google.com/rss/search?q=club%20atlas%20fc%20when%3A1h&hl=es-419&gl=MX&ceid=MX%3Aes-419',
-    'https://news.google.com/rss/search?q=atlas%20fc%20guadalajara%20when%3A1d&hl=es-419&gl=MX&ceid=MX%3Aes-419',
-    'https://news.google.com/rss/search?q=atlas%20fc%20guadalajara%20when%3A1h&hl=es-419&gl=MX&ceid=MX%3Aes-419',
-    'https://news.google.com/rss/search?q=atlas%20de%20guadalajara%20futbol%20when%3A1d&hl=es-419&gl=MX&ceid=MX%3Aes-419',
-    'https://news.google.com/rss/search?q=atlas%20de%20guadalajara%20futbol%20when%3A1h&hl=es-419&gl=MX&ceid=MX%3Aes-419',
-    'https://news.google.com/rss/search?q=los%20zorros%20atlas%20when%3A1d&hl=es-419&gl=MX&ceid=MX%3Aes-419',
-    'https://news.google.com/rss/search?q=los%20zorros%20atlas%20when%3A1h&hl=es-419&gl=MX&ceid=MX%3Aes-419'
+    'https://news.google.com/rss/search?q=%22Parabuses%22+when%3A1d&hl=es-419&gl=MX&ceid=MX%3Aes-419',
+    'https://news.google.com/rss/search?q=%22Parabuses%22+when%3A1h&hl=es-419&gl=MX&ceid=MX%3Aes-419'
   ],
 
-  BING_NEWS_FEEDS: [
-    'https://www.bing.com/news/search?q=atlas+fc+guadalajara&qft=interval%3d%227%22&format=rss&setlang=es&cc=MX',
-    'https://www.bing.com/news/search?q=club+atlas+fc&qft=interval%3d%227%22&format=rss&setlang=es&cc=MX',
-    'https://www.bing.com/news/search?q=atlas+de+guadalajara+futbol&qft=interval%3d%227%22&format=rss&setlang=es&cc=MX'
-  ],
+  BING_NEWS_FEEDS: [],
 
-  OTHER_FEEDS: [
-    { url: 'https://www.eleconomista.com.mx/rss/ultimas-noticias', isGoogle: false }
-  ],
-
-  KEYWORDS: [
-    'Atlas FC', 'ATLAS FC', 'atlas fc',
-    'Club Atlas', 'club atlas', 'CLUB ATLAS',
-    'Atlas Guadalajara', 'atlas guadalajara',
-    'Atlas de Guadalajara', 'atlas de guadalajara',
-    'Los Zorros', 'los zorros', 'Zorros del Atlas', 'zorros del atlas',
-    'Atlas de GDL', 'Atlas GDL'
-  ],
+  OTHER_FEEDS: [],
 
   MAX_AGE_HOURS: 24,
   DATE_TIMEZONE: 'America/Mexico_City',
   USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 
-  /**
-   * Descarta notas que parecen cobertura de partido (previa, vivo, minuto a minuto, etc.).
-   * Ajusta PHRASES si te come notas buenas o deja pasar partidos.
-   */
-  MATCH_REPORT_FILTER: {
-    ENABLED: true,
-    PHRASES: [
-      'minuto a minuto',
-      'minuto a minuto:',
-      'previa:',
-      'previa |',
-      'previa del partido',
-      'previa del juego',
-      'dónde ver',
-      'donde ver',
-      'cómo ver en vivo',
-      'como ver en vivo',
-      'transmisión en vivo',
-      'transmision en vivo',
-      'en vivo por',
-      'alineación',
-      'alineaciones',
-      'alineacion',
-      'once titular',
-      'cronica del partido',
-      'crónica del partido',
-      'resumen del partido',
-      'post partido',
-      'postpartido',
-      'highlights',
-      'goles del',
-      'marcador final',
-      'marcador:',
-      ' resultado ',
-      'tanda de penales',
-      'penales definen',
-      'jornada del apertura',
-      'jornada del clausura'
-    ]
-  },
-
-  /** Ruido barato: apuestas, tablas genéricas (la IA afina el resto). */
-  LOW_VALUE_FILTER: {
-    ENABLED: true,
-    PHRASES: [
-      'pronóstico',
-      'pronostico',
-      'mejores cuotas',
-      'mejor cuota',
-      'cuotas |',
-      'sportytrader',
-      'futbol24',
-      'tabla de posiciones',
-      '¿cómo va la tabla',
-      'como va la tabla',
-      'apuestas deportivas',
-      '¡gol!',
-      '!gol!',
-      'dónde y cuándo ver la jornada',
-      'donde y cuando ver la jornada',
-      'liga mx: ¿',
-      'liga mx ¿'
-    ]
-  },
+  /** Sin filtros — se captura todo lo que salga del feed. */
+  MATCH_REPORT_FILTER: { ENABLED: false, PHRASES: [] },
+  LOW_VALUE_FILTER:    { ENABLED: false, PHRASES: [] },
 
   AWARIO: {
     ENABLED: true,
