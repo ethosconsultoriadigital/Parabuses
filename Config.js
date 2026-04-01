@@ -37,7 +37,7 @@ var CONFIG = {
     TOKEN_PATH: '/oauth2/token',
     BEARER_API_BASE: 'https://api.awario.com',
     MENTIONS_PATH_V3: '/api/v3/mentions',
-    SOURCE_PREFIX: 'Awario · ',
+    SOURCE_PREFIX: '',
     ACCEPT_MISSING_DATE: true
   }
 };
