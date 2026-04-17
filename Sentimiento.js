@@ -36,7 +36,13 @@ function getSentimientoTexto(title, description) {
 
   try {
     var response = UrlFetchApp.fetch('https://api.openai.com/v1/chat/completions', options);
-    var json = JSON.parse(response.getContentText());
+    var code = response.getResponseCode();
+    var body = response.getContentText() || '';
+    if (code !== 200) {
+      Logger.log('Sentimiento HTTP ' + code + ' ' + body.substring(0, 300));
+      return 'Nota Neutral ⚪';
+    }
+    var json = JSON.parse(body);
     var choice = json.choices && json.choices[0];
     var word = (choice && choice.message && choice.message.content) ? choice.message.content.trim() : '';
     if (word.indexOf('Positiva') !== -1) return 'Nota Positiva 🟢';
