@@ -18,6 +18,32 @@ function awarioHostnameFromLink_(url) {
   return m[1].replace(/^www\./i, '');
 }
 
+/**
+ * Columna Source: solo medio. Quita prefijos tipo "Awario · ", "Awario -", "Awario-Latinus";
+ * si queda vacío, usa el host del enlace. Trunca a SOURCE_MAX_LEN.
+ */
+function awarioMedioParaSheet_(rawSource, link) {
+  var host = awarioHostnameFromLink_(link);
+  var s = String(rawSource || '').trim();
+  var prefix = (CONFIG.AWARIO && CONFIG.AWARIO.SOURCE_PREFIX) ? String(CONFIG.AWARIO.SOURCE_PREFIX).trim() : '';
+  if (prefix) s = (prefix + s).trim();
+
+  var i = 0;
+  while (i < 4 && /^awario[\s\u00B7\u22C5\-\._:]+/i.test(s)) {
+    s = s.replace(/^awario[\s\u00B7\u22C5\-\._:]+/i, '').trim();
+    i++;
+  }
+  s = s.replace(/^[\s\u00B7\u22C5\-\._:]+/g, '').trim();
+  if (!s || /^awario$/i.test(s)) s = host;
+
+  var maxLen = (CONFIG.AWARIO && CONFIG.AWARIO.SOURCE_MAX_LEN) ? Number(CONFIG.AWARIO.SOURCE_MAX_LEN) : 120;
+  if (!isNaN(maxLen) && maxLen > 0 && s.length > maxLen) {
+    s = s.substring(0, maxLen).replace(/\s+\S*$/, '').trim();
+    if (!s) s = host.substring(0, Math.min(maxLen, host.length));
+  }
+  return s || host;
+}
+
 function awarioFormatPubDateForSheet_(pub) {
   if (pub === undefined || pub === null) return '';
   var raw = String(pub).trim();
@@ -63,7 +89,10 @@ function mapAwarioMention_(m) {
   var id = awarioPick_(m, ['id', 'mention_id', 'uuid']);
   var title = awarioPick_(m, ['title', 'page_title', 'name']) || '';
   var desc = awarioPick_(m, ['text', 'content', 'description', 'snippet', 'body']) || '';
-  if (!title && desc) title = String(desc).substring(0, 220).trim();
+  var cfgAw = CONFIG.AWARIO || {};
+  var titleFbMax = cfgAw.TITLE_FALLBACK_MAX ? Number(cfgAw.TITLE_FALLBACK_MAX) : 200;
+  if (isNaN(titleFbMax) || titleFbMax < 40) titleFbMax = 200;
+  if (!title && desc) title = String(desc).substring(0, titleFbMax).trim();
   var pub = awarioPick_(m, ['published', 'published_at', 'date', 'timestamp', 'created_at', 'posted_at']);
   var source = '';
   if (m.source && typeof m.source === 'object') {
@@ -77,13 +106,18 @@ function mapAwarioMention_(m) {
   if (!source) source = host;
   if (!source && typeof m.source === 'string' && m.source.trim()) source = m.source.trim();
   if (!source) source = host;
-  var prefix = (CONFIG.AWARIO && CONFIG.AWARIO.SOURCE_PREFIX) ? String(CONFIG.AWARIO.SOURCE_PREFIX) : '';
+
+  var descMax = cfgAw.MENTION_DESCRIPTION_MAX_LEN ? Number(cfgAw.MENTION_DESCRIPTION_MAX_LEN) : 4000;
+  if (isNaN(descMax) || descMax < 200) descMax = 4000;
+  var descStr = String(desc).trim();
+  if (descStr.length > descMax) descStr = descStr.substring(0, descMax).replace(/\s+\S*$/, '').trim() + '…';
+
   return {
     title: String(title).trim(),
-    description: String(desc).trim(),
+    description: descStr,
     link: String(link).trim(),
     pubDate: awarioFormatPubDateForSheet_(pub) || '',
-    source: (prefix + source).trim(),
+    source: awarioMedioParaSheet_(source, link),
     guid: 'awario:' + (id || link),
     isGoogleNews: true
   };

@@ -28,7 +28,8 @@ var CONFIG = {
   AWARIO: {
     ENABLED: true,
     AUTH_MODE: 'api_key_query',
-    ALERT_ID: '600132317',
+    /** Alerta Parabuses en Awario (project/48775/alert/600129923) */
+    ALERT_ID: '600129923',
     ALERT_IDS: [],
     LIMIT_PER_ALERT: 40,
     API_BASE: 'https://api.awario.com/v1.0',
@@ -37,7 +38,14 @@ var CONFIG = {
     TOKEN_PATH: '/oauth2/token',
     BEARER_API_BASE: 'https://api.awario.com',
     MENTIONS_PATH_V3: '/api/v3/mentions',
-    SOURCE_PREFIX: 'Awario · ',
+    /** Vacío: en la hoja Source = solo el medio (sin prefijo Awario). */
+    SOURCE_PREFIX: '',
+    /** Máx. caracteres del nombre de medio en columna Source. */
+    SOURCE_MAX_LEN: 120,
+    /** Si no hay título, recorte del texto al armar título. */
+    TITLE_FALLBACK_MAX: 200,
+    /** Recorte de descripción Awario al volcar a la hoja. */
+    MENTION_DESCRIPTION_MAX_LEN: 4000,
     ACCEPT_MISSING_DATE: true
   }
 };
